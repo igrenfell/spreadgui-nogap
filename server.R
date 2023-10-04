@@ -1,223 +1,109 @@
-library(reticulate)
-library(tensorflow)
-library(keras)
-library(shiny)
+# paramNames <- c("start_capital", "annual_mean_return", "annual_ret_std_dev",
+#                 "annual_inflation", "annual_inf_std_dev", "monthly_withdrawals", "n_obs",
+#                 "n_sim")
 
-#use_virtualenv("r-tensorflow")
-
-setwd("I:\\workspace\\spreadgui")
-
-# new_model <- load_model_tf('gap')
-# new_model <- compile(new_model)
-# ###For Gap case
-# paramNames <- c( 'bed_slope_angle',
-#                  'bed_width',
-#                  'fuel_clump_size',
-#                  'fuel_depth',
-#                  'fuel_gap_size',
-#                  'fuel_loading',
-#                  'ignition_depth',
-#                  'particle_diameter',
-#                  'particle_moisture',
-#                  'wind_mean'
-#                  )
-# 
-# simulate_spread<- function( bed_slope_angle=0.0,
-#                             bed_width=50.0,
-#                             fuel_clump_size=1.0,
-#                             fuel_depth=0.5,
-#                             fuel_gap_size=0.15,
-#                             fuel_loading=1.0,
-#                             ignition_depth=1.0,
-#                             particle_diameter=0.0035,
-#                             particle_moisture=2.0,
-#                             wind_mean=3.0
-#     
-#   ) 
-# {
-#   #-------------------------------------
-#   # Rescaling Inputs
-#   #-------------------------------------
-#   
-#   min_bed_slope = 0.0
-#   max_bed_slope = 30.0
-#   bed_slope_scale = (bed_slope_angle - min_bed_slope) / max_bed_slope
-#   
-#   min_bed_width = 0.0
-#   max_bed_width = 30.0
-#   bed_width_scale = (bed_width - min_bed_width) / max_bed_width
-#   
-#   min_fuel_clump_size = 0.0
-#   max_fuel_clump_size = 30.0
-#   fuel_clump_size_scale = (fuel_clump_size - min_fuel_clump_size) / max_fuel_clump_size
-#   
-#   min_fuel_depth = 0.0
-#   max_fuel_depth= 30.0
-#   fuel_depth_scale = (fuel_depth - min_fuel_depth) / max_fuel_depth
-#   
-#   min_fuel_gap_size = 0.0
-#   max_fuel_gap_size= 30.0
-#   fuel_gap_size_scale = (fuel_gap_size - min_fuel_gap_size) / max_fuel_gap_size
-#   
-#   min_fuel_loading = 0.0
-#   max_fuel_loading = 30.0
-#   fuel_loading_scale = (fuel_loading - min_fuel_loading) / max_fuel_loading
-#   
-#   min_ignition_depth = 0.0
-#   max_ignition_depth = 30.0
-#   ignition_depth_scale = (ignition_depth - min_ignition_depth) / max_ignition_depth
-#   
-#   min_particle_diameter = 0.0
-#   max_particle_diameter = 30.0
-#   particle_diameter_scale = (particle_diameter - min_particle_diameter) / max_particle_diameter
-#   
-#   min_particle_moisture = 0.0
-#   max_particle_moisture = 30.0
-#   particle_moisture_scale = (particle_moisture - min_particle_moisture) / max_particle_moisture
-#   
-#   min_wind_mean = 0.0
-#   max_wind_mean = 30.0
-#   wind_mean_scale = (wind_mean - min_wind_mean) / max_wind_mean
-#   
-#   
-#   #-------------------------------------
-#   # Simulation
-#   #-------------------------------------
-#   
-#   ##Single input for now, set up for multiple inputs
-#   
-#   fuel_bed_data_frame <- as.matrix(cbind(bed_slope_scale,
-#                                          bed_width_scale,
-#                                          fuel_clump_size_scale,
-#                                          fuel_depth_scale,
-#                                          fuel_gap_size_scale,
-#                                          fuel_loading_scale,
-#                                          ignition_depth_scale,
-#                                          particle_diameter_scale,
-#                                          particle_moisture_scale,
-#                                          wind_mean_scale
-#                                          
-#   ))
-#   
-#   
-#   
-#   spread_predict <- predict(new_model, fuel_bed_data_frame)
-#   
-#   return(spread_predict)
-# }
-
-###For No Gap case
-
+paramNames <- c("degrees", "bed_width", "fuel_depth",
+                "fuel_loading", "ignition_depth", "particle_diameter", "particle_moisture",
+                "wind_mean")
+use_virtualenv("G:\\tensorflow\\venv")
+setwd("G:\\tensorflow\\modelProtocolBuffers")
 new_model <- load_model_tf('no_gap')
-new_model <- compile(new_model)
-paramNames <- c( 'bed_slope_angle',
-                 'bed_width',
-                 #'fuel_clump_size',
-                 'fuel_depth',
-                # 'fuel_gap_size',
-                 'fuel_loading',
-                 'ignition_depth',
-                 'particle_diameter',
-                 'particle_moisture',
-                 'wind_mean'
-                 )
 
-simulate_spread<- function( bed_slope_angle=0.0,
-                            bed_width=50.0,
-                            #fuel_clump_size=1.0,
-                            fuel_depth=0.5,
-                            #fuel_gap_size=0.15,
-                            fuel_loading=1.0,
-                            ignition_depth=1.0,
-                            particle_diameter=0.0035,
-                            particle_moisture=2.0,
-                            wind_mean=3.0
+nmc <- compile(new_model)
 
-  )
+predict_spread <- function(degrees = 0, bed_width = 50,
+                           fuel_depth = 0.5, fuel_loading = 1.0,
+                           ignition_depth = 1.0, particle_diameter = 0.0035, particle_moisture = 2.0, wind_mean = 3.0)
+  {
+  #-------------------------------------
+  # Inputs
+  #-------------------------------------
+  
+  #Normalizing slope 
+  numerator <- degrees - 0
+  denominator <- 30 - 0
+  degrees <- numerator / denominator
+  
+  #Normalizing bed_width 
+  numerator <- bed_width - 1
+  denominator <- 50 - 1
+  bed_width <- numerator / denominator
+  #Normalizing fuel_depth 
+  numerator <- fuel_depth - 0.05
+  denominator <- 1 - 0.05
+  fuel_depth <- numerator / denominator
+  #Normalizing fuel_loading 
+  numerator <- fuel_loading - 0.05
+  denominator <- 3 - 0.05
+  fuel_loading <- numerator / denominator
+  #Normalizing ignition_depth 
+  numerator <- ignition_depth - 0.1
+  denominator <- 4 - 0.1
+  ignition_depth <- numerator / denominator
+  #Normalizing particle_diameter 
+  numerator <- particle_diameter - 0.001
+  denominator <- 0.005 - 0.001
+  particle_diameter <- numerator / denominator
+  #Normalizing particle_moisture 
+  numerator <- particle_moisture - 2
+  denominator <- 35 - 2
+  particle_moisture <- numerator / denominator
+  #Normalizing wind_mean 
+  numerator <- wind_mean - 1
+  denominator <- 10 - 1
+  wind_mean <- numerator / denominator
 
-{
   #-------------------------------------
-  # Rescaling Inputs
-  #-------------------------------------
-  
-  min_bed_slope = 0.0
-  max_bed_slope = 30.0
-  bed_slope_scale = (bed_slope_angle - min_bed_slope) / max_bed_slope
-  
-  min_bed_width = 0.0
-  max_bed_width = 30.0
-  bed_width_scale = (bed_width - min_bed_width) / max_bed_width
-  
-  # min_fuel_clump_size = 0.0
-  # max_fuel_clump_size = 30.0
-  # fuel_clump_size_scale = (fuel_clump_size - min_fuel_clump_size) / max_fuel_clump_size
-  
-  min_fuel_depth = 0.0
-  max_fuel_depth= 30.0
-  fuel_depth_scale = (fuel_depth - min_fuel_depth) / max_fuel_depth
-  
-  # min_fuel_gap_size = 0.0
-  # max_fuel_gap_size= 30.0
-  # fuel_gap_size_scale = (fuel_gap_size - min_fuel_gap_size) / max_fuel_gap_size
-  
-  min_fuel_loading = 0.0
-  max_fuel_loading = 30.0
-  fuel_loading_scale = (fuel_loading - min_fuel_loading) / max_fuel_loading
-  
-  min_ignition_depth = 0.0
-  max_ignition_depth = 30.0
-  ignition_depth_scale = (ignition_depth - min_ignition_depth) / max_ignition_depth
-  
-  min_particle_diameter = 0.0
-  max_particle_diameter = 30.0
-  particle_diameter_scale = (particle_diameter - min_particle_diameter) / max_particle_diameter
-  
-  min_particle_moisture = 0.0
-  max_particle_moisture = 30.0
-  particle_moisture_scale = (particle_moisture - min_particle_moisture) / max_particle_moisture
-  
-  min_wind_mean = 0.0
-  max_wind_mean = 30.0
-  wind_mean_scale = (wind_mean - min_wind_mean) / max_wind_mean
-  
-  
-  #-------------------------------------
-  # Simulation
+  # Prediction
   #-------------------------------------
   
-  ##Single input for now, set up for multiple inputs
+  predvec <- c(degrees,
+               bed_width,
+               fuel_depth,
+               fuel_loading,
+               ignition_depth,
+               particle_diameter,
+               particle_moisture,
+               wind_mean)
   
-  fuel_bed_data_frame <- as.matrix(cbind(bed_slope_scale,
-                                             bed_width_scale,
-                                             #fuel_clump_size_scale,
-                                             fuel_depth_scale,
-                                            # fuel_gap_size_scale,
-                                             fuel_loading_scale,
-                                             ignition_depth_scale,
-                                             particle_diameter_scale,
-                                             particle_moisture_scale,
-                                             wind_mean_scale
-                                             
-  ))
+ 
+  x <- t(as.matrix(cbind(predvec)))
+  pred.output <- nmc %>% predict(x)
+  pred.output
   
+  ###Normalize output
+  numerator <- pred.output[1] -  0.0
+  denominator <- 50.710646000000004 -  0.0
+  flamelength <- numerator / denominator
+  numerator <- pred.output[2] -  0.0
+  denominator <- 67.77206 -  0.0
+  fzd <- numerator / denominator
+  numerator <- pred.output[3] -  0.0
+  denominator <- 783.45548 -  0.0
+  ros <- numerator / denominator
   
-  
-  spread_predict <- predict(new_model, fuel_bed_data_frame)
-  
-  return(spread_predict)
+  outvec <- c(flamelength, fzd, ros)
+    return(outvec)
 }
 
-plot_spread <- function(spread_predict) {
+plot_nav <- function(nav) {
   
   layout(matrix(c(1,1)))
   
   palette(c("black", "grey50", "grey30", "grey70", "#d9230f"))
   
   # plot all scenarios
+  barplot(nav, names.arg= c("FL (m)", "FZD (m)", "ROS (m/min)"))
   
-  barplot(spread_predict)
+  grid()
+  
 }
 
+# Define server logic required to generate and plot a random distribution
+#
+# Idea and original code by Pierre Chretien
+# Small updates by Michael Kapler
+#
 function(input, output, session) {
   
   getParams <- function(prefix) {
@@ -230,10 +116,24 @@ function(input, output, session) {
     params
   }
   
-  spreadA <- reactive(do.call(simulate_spread, getParams("a")))
+  # Function that generates scenarios and computes NAV. The expression
+  # is wrapped in a call to reactive to indicate that:
+  #
+  #  1) It is "reactive" and therefore should be automatically
+  #     re-executed when inputs change
+  #
+  navA <- reactive(do.call(predict_spread, getParams("a")))
+
+  # Expression that plot NAV paths. The expression
+  # is wrapped in a call to renderPlot to indicate that:
+  #
+  #  1) It is "reactive" and therefore should be automatically
+  #     re-executed when inputs change
+  #  2) Its output type is a plot
+  #
   output$a_distPlot <- renderPlot({
-    plot_spread(spreadA())
-  })
-  
-  
+    plot_nav(navA())})
+    # 
+    # output$b_distPlot <- renderPlot({
+    #   plot_nav(navB())
 }
