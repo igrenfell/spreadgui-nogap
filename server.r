@@ -1,23 +1,30 @@
+library(here)
+library(tensorflow)
+library(keras)
+
+setwd(here())
 # paramNames <- c("start_capital", "annual_mean_return", "annual_ret_std_dev",
 #                 "annual_inflation", "annual_inf_std_dev", "monthly_withdrawals", "n_obs",
 #                 "n_sim")
 
-paramNames <- c("bed_slope_angle", "bed_width", "fuel_depth",
-                "fuel_loading", "ignition_depth", "particle_diameter", "particle_moisture",
-                "wind_mean", "xvar", "yvar")
 #use_virtualenv("G:\\tensorflow\\venv")
-setwd("I:\\workspace\\spread-model\\modelProtocolBuffers")
+#setwd("G:\\tensorflow\\modelProtocolBuffers")
 new_model <- load_model_tf('no_gap')
 
 nmc <- compile(new_model)
+ycolnames <- c("fzd", "flength", "ros")
+
+paramNames <- c("bed_slope_angle", "bed_width", "fuel_depth",
+                "fuel_loading", "ignition_depth", "particle_diameter", "particle_moisture",
+                "wind_mean", "xvar", "yvar")
 
 predict_spread <- function(bed_slope_angle = 0, bed_width = 50,
                            fuel_depth = 0.5, fuel_loading = 1.0,
                            ignition_depth = 1.0, particle_diameter = 0.0035, particle_moisture = 2.0, wind_mean = 3.0, xvar, yvar)
 {
+ 
   xcolnum <- which(xvar == paramNames)
   ycolnum <- which(yvar == ycolnames)
-  
   #-------------------------------------
   # Inputs
   #-------------------------------------
@@ -81,7 +88,7 @@ predict_spread <- function(bed_slope_angle = 0, bed_width = 50,
                  min_particle_moisture, 
                  min_particle_moisture, 
                  min_wind_speed
-                 )
+  )
   
   
   max_x_vec <- c(max_degrees, 
@@ -114,7 +121,7 @@ predict_spread <- function(bed_slope_angle = 0, bed_width = 50,
   #colnames(xrep) <- x_axis_vars
   xparamnames <- (x_axis_vars)
   xcolnum <- which(xparamnames == xvar)
- # xcolnum <- 1
+  # xcolnum <- 1
   min_degrees <- 0
   max_degrees <- 30
   numerator <- bed_slope_angle - min_degrees
@@ -146,31 +153,34 @@ predict_spread <- function(bed_slope_angle = 0, bed_width = 50,
   ros <-pred.output[,3] * 783.45548
   
   outmat<- cbind(flamelength, fzd, ros)
-  ycolnames <- c("fzd", "flength", "ros")
   ycolnum <- which(ycolnames == yvar)
   colnames(outmat) <- ycolnames
-  outlist <- vector("list", 2)
+  outlist <- vector("list", 5)
   outlist[[1]] <- xrep[,xcolnum]
   outlist[[2]] <- outmat[,ycolnum]
+  outlist[[3]] <- xcolnum
+  outlist[[4]] <- ycolnum
+  outlist[[5]] <- tempxvals
   
   return(outlist)
 }
 
 plot_nav <- function(nav) {
+  
 
   layout(matrix(c(1,1)))
-
+  
   palette(c("black", "grey50", "grey30", "grey70", "#d9230f"))
-
+  
   tempx <- nav[[1]]
   tempy <- nav[[2]]
-
-  # plot all scenarios
- # barplot(nav, names.arg= c("FL (m)", "FZD (m)", "ROS (m/min)"))
-  plot(tempx, tempy, type = "l")
-  #plot(xrep[,xcolnum], outmat[,ycolnum])
+  xcoltemp <- nav[[3]]
+  ycoltemp <- nav[[4]]
+  orig.x  <-  nav[[5]]
+  
+  plot(orig.x, tempy, type = "l", xlab = paramNames[xcoltemp], ylab = ycolnames[ycoltemp])
   grid()
-
+  
 }
 
 function(input, output, session) {
@@ -184,12 +194,12 @@ function(input, output, session) {
                                    wind_mean=input$wind_mean, 
                                    xvar=  input$xvar, 
                                    yvar= input$yvar
-      )
-   
+  )
+    
     
   })
   output$a_distPlot <- renderPlot({
- 
+    
     plot_nav(navA())  }
   )
 }
