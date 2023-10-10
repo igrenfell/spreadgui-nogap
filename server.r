@@ -20,11 +20,13 @@ paramNames <- c("bed_slope_angle", "bed_width", "fuel_depth",
 
 predict_spread <- function(bed_slope_angle = 0, bed_width = 50,
                            fuel_depth = 0.5, fuel_loading = 1.0,
-                           ignition_depth = 1.0, particle_diameter = 0.0035, particle_moisture = 2.0, wind_mean = 3.0, xvar, yvar)
+                           ignition_depth = 1.0, particle_diameter = 0.0035, particle_moisture = 2.0, wind_mean = 3.0, xvar, yvar, levvar)
 {
  
   xcolnum <- which(xvar == paramNames)
   ycolnum <- which(yvar == ycolnames)
+  levcolum <- which(levvar == paramNames)
+  nlevs = 5
   #-------------------------------------
   # Inputs
   #-------------------------------------
@@ -101,6 +103,8 @@ predict_spread <- function(bed_slope_angle = 0, bed_width = 50,
                  max_wind_speed
   )
   
+  levseq <- seq(0, 1, length = 5)
+  
   #-------------------------------------
   # Prediction
   #-------------------------------------
@@ -133,10 +137,21 @@ predict_spread <- function(bed_slope_angle = 0, bed_width = 50,
   denominator <- max_x_vec[xcolnum] - min_x_vec[xcolnum]
   temp.pred.x <- numerator / denominator
   xrep[,xcolnum] <- temp.pred.x
+  nreps <- length(levseq)
+  xrep.list <- vector("list", nreps)
+  for(i in 1:nreps)
+  {
+    tempmat <- xrep
+    tempmat[,levcolum] <- rep(levseq[i], dim(xrep)[1])
+    xrep.list[[i]] <- tempmat
+    
+  }
+  xrep.all <- do.call("rbind", xrep.list)
+  
   #xrep[,xcolnum] <- seq(0, 30, length = 10)
   
-  print(xrep[,xcolnum])
-  pred.output <- nmc %>% predict(xrep)
+  #print(xrep[,xcolnum])
+  pred.output <- nmc %>% predict(xrep.all)
   #pred.output <- nmc %>% predict(x)
   
   pred.output
@@ -154,10 +169,24 @@ predict_spread <- function(bed_slope_angle = 0, bed_width = 50,
   
   outmat<- cbind(flamelength, fzd, ros)
   ycolnum <- which(ycolnames == yvar)
+  ycollist <- vector("list", nreps)
+  startseq <- seq(1,41, by = 10)
+  endseq <- seq(10, 50,by=10)
+  
+  
+  for(i in 1:nreps)
+  {
+    ycollist[[i]] <- outmat[,ycolnum][startseq[i]:endseq[i]]
+    
+  }
+  
+  ycolmat <- do.call("cbind", ycollist)
+  
   colnames(outmat) <- ycolnames
   outlist <- vector("list", 5)
   outlist[[1]] <- xrep[,xcolnum]
-  outlist[[2]] <- outmat[,ycolnum]
+#  outlist[[2]] <- outmat[,ycolnum]
+  outlist[[2]] <- ycolmat
   outlist[[3]] <- xcolnum
   outlist[[4]] <- ycolnum
   outlist[[5]] <- tempxvals
@@ -171,16 +200,22 @@ plot_nav <- function(nav) {
   layout(matrix(c(1,1)))
   
   palette(c("black", "grey50", "grey30", "grey70", "#d9230f"))
+  startseq <- seq(1,41, by = 10)
+  endseq <- seq(10, 50,by=10)
   
   tempx <- nav[[1]]
-  tempy <- nav[[2]]
   xcoltemp <- nav[[3]]
   ycoltemp <- nav[[4]]
   orig.x  <-  nav[[5]]
   
-  plot(orig.x, tempy, type = "l", xlab = paramNames[xcoltemp], ylab = ycolnames[ycoltemp])
-  grid()
+  ymattemp <-  nav[[2]]
+  #ymmattemp <-  outmat[,ycolnum]
+ # ymattemp <- matrix(ymattemp, nrow = 10, byrow = TRUE)
+  matplot(orig.x, ymattemp, type=  "n", xlab = paramNames[xcoltemp], ylab = ycolnames[ycoltemp])
+  matlines(orig.x, ymattemp, col = rainbow(5), xlab = paramNames[xcoltemp], ylab = ycolnames[ycoltemp])
   
+  grid()
+
 }
 
 function(input, output, session) {
@@ -193,7 +228,8 @@ function(input, output, session) {
                                    particle_moisture=  input$particle_moisture, 
                                    wind_mean=input$wind_mean, 
                                    xvar=  input$xvar, 
-                                   yvar= input$yvar
+                                   yvar= input$yvar,
+                                   levvar = input$levvar
   )
     
     
