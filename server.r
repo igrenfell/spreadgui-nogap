@@ -1,15 +1,17 @@
-library(here)
 library(tensorflow)
 library(keras)
 
-setwd(here())
 # paramNames <- c("start_capital", "annual_mean_return", "annual_ret_std_dev",
 #                 "annual_inflation", "annual_inf_std_dev", "monthly_withdrawals", "n_obs",
 #                 "n_sim")
 
 #use_virtualenv("G:\\tensorflow\\venv")
 #setwd("G:\\tensorflow\\modelProtocolBuffers")
-new_model <- load_model_tf('no_gap')
+
+#needed to set virtual environment on server for shiny user
+use_virtualenv("/home/natalie/.virtualenvs/r-tensorflow")
+
+new_model <- load_model_tf('modelProtocolBuffers/no_gap')
 
 nmc <- compile(new_model)
 ycolnames <- c("fzd", "flength", "ros")
