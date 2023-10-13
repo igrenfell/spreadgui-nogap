@@ -12,19 +12,28 @@ library(keras)
 use_virtualenv("/home/natalie/.virtualenvs/r-tensorflow")
 
 new_model <- load_model_tf('modelProtocolBuffers/no_gap')
+#setwd("I:\\workspace\\spread-model\\modelProtocolBuffers")
+
+new_model <- load_model_tf('no_gap')
 
 nmc <- compile(new_model)
 ycolnames <- c("fzd", "flength", "ros")
+ycolnames.verbose <- c("Flame Zone Depth", "Flame Length", "Rate of Spread")
 
 paramNames <- c("bed_slope_angle", "bed_width", "fuel_depth",
                 "fuel_loading", "ignition_depth", "particle_diameter", "particle_moisture",
                 "wind_mean", "xvar", "yvar")
 
+
+paramNames.verbose <- c("Bed Slope Angle", "Bed Width", "Fuel Depth",
+                "Fuel Loading", "Ignition Depth", "Particle Diameter", "Particle Moisture",
+                "Mean Wind Speed", "xvar", "yvar")
+
 predict_spread <- function(bed_slope_angle = 0, bed_width = 50,
                            fuel_depth = 0.5, fuel_loading = 1.0,
                            ignition_depth = 1.0, particle_diameter = 0.0035, particle_moisture = 2.0, wind_mean = 3.0, xvar, yvar, levvar)
 {
- 
+  
   xcolnum <- which(xvar == paramNames)
   ycolnum <- which(yvar == ycolnames)
   levcolum <- which(levvar == paramNames)
@@ -150,6 +159,13 @@ predict_spread <- function(bed_slope_angle = 0, bed_width = 50,
   }
   xrep.all <- do.call("rbind", xrep.list)
   
+  tempxvals.lev <- levseq
+  denominator.lev <- max_x_vec[levcolum] - min_x_vec[levcolum]
+  tempxvals.lev <- tempxvals.lev * denominator
+  tempxvals.lev <- tempxvals.lev  + min_x_vec[levcolum]
+  temp.levs.x <- tempxvals.lev
+  
+  
   #xrep[,xcolnum] <- seq(0, 30, length = 10)
   
   #print(xrep[,xcolnum])
@@ -185,23 +201,30 @@ predict_spread <- function(bed_slope_angle = 0, bed_width = 50,
   ycolmat <- do.call("cbind", ycollist)
   
   colnames(outmat) <- ycolnames
-  outlist <- vector("list", 5)
+  outlist <- vector("list", 7)
   outlist[[1]] <- xrep[,xcolnum]
-#  outlist[[2]] <- outmat[,ycolnum]
+  #  outlist[[2]] <- outmat[,ycolnum]
   outlist[[2]] <- ycolmat
   outlist[[3]] <- xcolnum
   outlist[[4]] <- ycolnum
   outlist[[5]] <- tempxvals
+  outlist[[6]] <- temp.levs.x
+  outlist[[7]] <- levcolum
   
   return(outlist)
 }
 
 plot_nav <- function(nav) {
   
-
+  
   layout(matrix(c(1,1)))
   
   palette(c("black", "grey50", "grey30", "grey70", "#d9230f"))
+  
+  colorBlindBlack8  <- c("#000000", "#E69F00", "#56B4E9", "#009E73", 
+                         "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+  
+  
   startseq <- seq(1,41, by = 10)
   endseq <- seq(10, 50,by=10)
   
@@ -211,13 +234,16 @@ plot_nav <- function(nav) {
   orig.x  <-  nav[[5]]
   
   ymattemp <-  nav[[2]]
+  legvals <- nav[[6]]
+  levcolnum <- nav[[7]]
   #ymmattemp <-  outmat[,ycolnum]
- # ymattemp <- matrix(ymattemp, nrow = 10, byrow = TRUE)
-  matplot(orig.x, ymattemp, type=  "n", xlab = paramNames[xcoltemp], ylab = ycolnames[ycoltemp])
-  matlines(orig.x, ymattemp, col = rainbow(5), xlab = paramNames[xcoltemp], ylab = ycolnames[ycoltemp])
+  # ymattemp <- matrix(ymattemp, nrow = 10, byrow = TRUE)
+  matplot(orig.x, ymattemp, type=  "n", xlab = paramNames.verbose[xcoltemp], ylab = ycolnames.verbose[ycoltemp])
+  matlines(orig.x, ymattemp, col =colorBlindBlack8, lwd = 2)
+  legend("topleft",  legend = legvals, lty = 1:nlevs, col = colorBlindBlack8, lwd = 2, title = paramNames.verbose[levcolnum])
   
   grid()
-
+  
 }
 
 function(input, output, session) {

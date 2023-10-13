@@ -6,7 +6,7 @@ x_axis_vars <- c(
   "Ignition Depth" = "ignition_depth",
   "Particle Diameter" = "particle_diameter",
   "Particle Moisture" = "particle_moisture",
-  "Wind SPeed" = "wind_mean"
+  "Wind Speed" = "wind_mean"
   
   
 )
@@ -17,3 +17,4 @@ y_axis_vars <- c(
   "Spread Rate" = "ros"
   
 )
+
