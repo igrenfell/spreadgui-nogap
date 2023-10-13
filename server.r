@@ -1,21 +1,25 @@
-library(here)
 library(tensorflow)
 library(keras)
 
-setwd(here())
 # paramNames <- c("start_capital", "annual_mean_return", "annual_ret_std_dev",
 #                 "annual_inflation", "annual_inf_std_dev", "monthly_withdrawals", "n_obs",
 #                 "n_sim")
 
 #use_virtualenv("G:\\tensorflow\\venv")
 #setwd("G:\\tensorflow\\modelProtocolBuffers")
+
+#needed to set virtual environment on server for shiny user
+use_virtualenv("/home/natalie/.virtualenvs/r-tensorflow")
+new_model <- load_model_tf('no_gap')
+
+#new_model <- load_model_tf('modelProtocolBuffers/no_gap')
 #setwd("I:\\workspace\\spread-model\\modelProtocolBuffers")
 
 new_model <- load_model_tf('no_gap')
 
 nmc <- compile(new_model)
-ycolnames <- c("fzd", "flength", "ros")
-ycolnames.verbose <- c("Flame Zone Depth", "Flame Length", "Rate of Spread")
+ycolnames <- c( "ros", "fzd", "flength")
+ycolnames.verbose <- c( "Rate of Spread", "Flame Zone Depth", "Flame Length")
 
 paramNames <- c("bed_slope_angle", "bed_width", "fuel_depth",
                 "fuel_loading", "ignition_depth", "particle_diameter", "particle_moisture",
@@ -23,8 +27,11 @@ paramNames <- c("bed_slope_angle", "bed_width", "fuel_depth",
 
 
 paramNames.verbose <- c("Bed Slope Angle", "Bed Width", "Fuel Depth",
-                "Fuel Loading", "Ignition Depth", "Particle Diameter", "Particle Moisture",
-                "Mean Wind Speed", "xvar", "yvar")
+                        "Fuel Loading", "Ignition Depth", "Particle Diameter", "Particle Moisture",
+                        "Mean Wind Speed", "xvar", "yvar")
+
+nlevs <- 5
+npoints <- 100
 
 predict_spread <- function(bed_slope_angle = 0, bed_width = 50,
                            fuel_depth = 0.5, fuel_loading = 1.0,
@@ -34,12 +41,9 @@ predict_spread <- function(bed_slope_angle = 0, bed_width = 50,
   xcolnum <- which(xvar == paramNames)
   ycolnum <- which(yvar == ycolnames)
   levcolum <- which(levvar == paramNames)
-  nlevs = 5
   #-------------------------------------
   # Inputs
   #-------------------------------------
-  print(bed_slope_angle)
-  
   #Normalizing slope 
   min_degrees <- 0
   max_degrees <- 30
@@ -111,7 +115,7 @@ predict_spread <- function(bed_slope_angle = 0, bed_width = 50,
                  max_wind_speed
   )
   
-  levseq <- seq(0, 1, length = 5)
+  levseq <- seq(0, 1, length = nlevs)
   
   #-------------------------------------
   # Prediction
@@ -128,8 +132,8 @@ predict_spread <- function(bed_slope_angle = 0, bed_width = 50,
   
   
   x <- t(as.matrix(cbind(predvec)))
-  xrep <- rbind(rep(x, 10))
-  xrep <- matrix(xrep, nrow = 10, byrow = TRUE)
+  xrep <- rbind(rep(x, npoints))
+  xrep <- matrix(xrep, nrow = npoints, byrow = TRUE)
   #colnames(xrep) <- x_axis_vars
   xparamnames <- (x_axis_vars)
   xcolnum <- which(xparamnames == xvar)
@@ -140,18 +144,27 @@ predict_spread <- function(bed_slope_angle = 0, bed_width = 50,
   denominator <- max_degrees - min_degrees
   degrees.scale <- numerator / denominator
   
-  tempxvals <- seq(min_x_vec[xcolnum], max_x_vec[xcolnum], length = 10)
+  tempxvals <- seq(min_x_vec[xcolnum], max_x_vec[xcolnum], length = npoints)
   numerator <- tempxvals - min_x_vec[xcolnum]
   denominator <- max_x_vec[xcolnum] - min_x_vec[xcolnum]
   temp.pred.x <- numerator / denominator
   xrep[,xcolnum] <- temp.pred.x
   nreps <- length(levseq)
   xrep.list <- vector("list", nreps)
+  
+  startseq <- rep(NA, nreps)
+  endseq <- rep(NA, nreps)
+  
+  inc <- 0
+  
   for(i in 1:nreps)
   {
+    startseq[i] <- inc * npoints + 1
+    endseq[i] <- (inc + 1) * npoints
     tempmat <- xrep
     tempmat[,levcolum] <- rep(levseq[i], dim(xrep)[1])
     xrep.list[[i]] <- tempmat
+    inc <- inc + 1
     
   }
   xrep.all <- do.call("rbind", xrep.list)
@@ -169,7 +182,7 @@ predict_spread <- function(bed_slope_angle = 0, bed_width = 50,
   pred.output <- nmc %>% predict(xrep.all)
   #pred.output <- nmc %>% predict(x)
   
-  pred.output
+  #pred.output
   
   ###Normalize output
   numerator <- pred.output[,1] -  0.0
@@ -185,9 +198,6 @@ predict_spread <- function(bed_slope_angle = 0, bed_width = 50,
   outmat<- cbind(flamelength, fzd, ros)
   ycolnum <- which(ycolnames == yvar)
   ycollist <- vector("list", nreps)
-  startseq <- seq(1,41, by = 10)
-  endseq <- seq(10, 50,by=10)
-  
   
   for(i in 1:nreps)
   {
@@ -222,8 +232,8 @@ plot_nav <- function(nav) {
                          "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
   
   
-  startseq <- seq(1,41, by = 10)
-  endseq <- seq(10, 50,by=10)
+  startseq <- seq(1,41, by = npoints)
+  endseq <- seq(10, 50,by=npoints)
   
   tempx <- nav[[1]]
   xcoltemp <- nav[[3]]
