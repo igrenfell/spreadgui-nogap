@@ -12,7 +12,9 @@ x_axis_vars <- c(
 )
 
 y_axis_vars <- c(
-  "Rate of Spread" = "ros",
+  "Spread Rate" = "ros",
   "Flame Zone Depth" = "fzd",
   "Flame Length" = "flength"
+  
 )
+

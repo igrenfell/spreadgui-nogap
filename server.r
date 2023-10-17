@@ -9,14 +9,15 @@ library(reticulate)
 #                 "n_sim")
 
 #use_virtualenv("G:\\tensorflow\\venv")
-#use_virtualenv("I:\\spreadvenv\\spreadvenv")
+use_virtualenv("I:\\spreadvenv\\spreadvenv")
+setwd("I:\\workspace\\spread-model\\modelProtocolBuffers")
+
 #setwd("G:\\tensorflow\\modelProtocolBuffers")
 
 #needed to set virtual environment on server for shiny user
-use_virtualenv("/home/natalie/.virtualenvs/r-tensorflow")
+#use_virtualenv("/home/natalie/.virtualenvs/r-tensorflow")
 
 
-#setwd("I:\\workspace\\spread-model\\modelProtocolBuffers")
 
 new_model <- load_model_tf('no_gap')
 
@@ -38,7 +39,7 @@ npoints <- 100
 
 predict_spread <- function(bed_slope_angle = 0, bed_width = 50,
                            fuel_depth = 0.5, fuel_loading = 1.0,
-                           ignition_depth = 1.0, particle_diameter = 0.0035, particle_moisture = 2.0, wind_mean = 3.0, xvar, yvar, levvar)
+                           ignition_depth = 1.0, particle_diameter = 0.0035, particle_moisture = 2.0, wind_mean = 3.0, xvar = "bed_slope_angle", yvar  = "ros", levvar ="bed_width" )
 {
   
   xcolnum <- which(xvar == paramNames)
@@ -276,4 +277,28 @@ function(input, output, session) {
     
     plot_nav(navA())  }
   )
+  observeEvent(
+    input$xvar,
+    {
+      updateSelectInput(
+        inputId = "levvar",
+        choices = setdiff(paramNames[1:8], isolate(input$xvar)),
+        selected = isolate(input$levvar)
+      )
+    }
+  )
+  observeEvent(
+    input$levvar,
+    {
+      updateSelectInput(
+        inputId = "xvar",
+        choices = setdiff(paramNames[1:8], isolate(input$levvar)),
+        selected = isolate(input$right)
+      )
+    }
+  )
+  
+  
+  
 }
+
