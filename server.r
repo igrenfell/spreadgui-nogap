@@ -1,18 +1,21 @@
+library(here)
 library(tensorflow)
 library(keras)
+library(reticulate)
 
+#setwd(here())
 # paramNames <- c("start_capital", "annual_mean_return", "annual_ret_std_dev",
 #                 "annual_inflation", "annual_inf_std_dev", "monthly_withdrawals", "n_obs",
 #                 "n_sim")
 
 #use_virtualenv("G:\\tensorflow\\venv")
+#use_virtualenv("I:\\spreadvenv\\spreadvenv")
 #setwd("G:\\tensorflow\\modelProtocolBuffers")
 
 #needed to set virtual environment on server for shiny user
 use_virtualenv("/home/natalie/.virtualenvs/r-tensorflow")
-new_model <- load_model_tf('no_gap')
 
-#new_model <- load_model_tf('modelProtocolBuffers/no_gap')
+
 #setwd("I:\\workspace\\spread-model\\modelProtocolBuffers")
 
 new_model <- load_model_tf('no_gap')
@@ -232,8 +235,8 @@ plot_nav <- function(nav) {
                          "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
   
   
-  startseq <- seq(1,41, by = npoints)
-  endseq <- seq(10, 50,by=npoints)
+  startseq <- seq(1,41, length = npoints)
+  endseq <- seq(10, 50,length=npoints)
   
   tempx <- nav[[1]]
   xcoltemp <- nav[[3]]
