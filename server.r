@@ -175,7 +175,7 @@ predict_spread <- function(bed_slope_angle = 0, bed_width = 50,
   
   tempxvals.lev <- levseq
   denominator.lev <- max_x_vec[levcolum] - min_x_vec[levcolum]
-  tempxvals.lev <- tempxvals.lev * denominator
+  tempxvals.lev <- tempxvals.lev * denominator.lev
   tempxvals.lev <- tempxvals.lev  + min_x_vec[levcolum]
   temp.levs.x <- tempxvals.lev
   
@@ -281,9 +281,9 @@ function(input, output, session) {
     input$xvar,
     {
       updateSelectInput(
-        inputId = "levvar",
-        choices = setdiff(paramNames[1:8], isolate(input$xvar)),
-        selected = isolate(input$levvar)
+        inputId = "xvar",
+        choices = setdiff(paramNames[1:8], isolate(input$levvar)),
+        selected = isolate(input$xvar)
       )
     }
   )
@@ -291,9 +291,9 @@ function(input, output, session) {
     input$levvar,
     {
       updateSelectInput(
-        inputId = "xvar",
-        choices = setdiff(paramNames[1:8], isolate(input$levvar)),
-        selected = isolate(input$right)
+        inputId = "levvar",
+        choices = setdiff(paramNames[1:8], isolate(input$xvar)),
+        selected = isolate(input$levvar)
       )
     }
   )

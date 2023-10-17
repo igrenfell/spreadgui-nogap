@@ -6,15 +6,21 @@ renderInputs <- function(prefix) {
     
     
     titlePanel("L1GHTFIRE-ML"),
+    column(width = 2, offset = 0, 
+           img(src='Logo_of_the_United_States_Forest_Service.svg.png', align = "right", height="25%", width="25%")),
+    
+    column(width = 2, offset = 0, 
+           img(src='Google_2015_logo.svg.png', align = "right", height="50%", width="50%")),
     column(width = 4, offset = 0, 
-           img(src='Google_2015_logo.svg.png', align = "right", height="100%", width="100%")),
-    column(width = 4, offset = 0, 
-           img(src='Logo_of_the_United_States_Forest_Service.svg.png', align = "right", height="50%", width="50%")),
+           print("The L1HTFire model (Linear 1-Dimensional Heat Transfer) is a physics-based wildland fire spread model created by the USFS Missoula Fire Sciences Laboratory. 
+                 This is a Machine Learning (ML) Surrogate of L1HTFire and displays 3 output variables: fire spread rate, flame length, and flame zone depth. 
+                 Google Research created the ML version using 575 million training runs of the physical model. The ML surrogate model is hosted here for demonstration purposes only in order to illustrate 
+                 how wildland fire behavior results from the complex relationships between environmental and fire variables.")),
+    
     fluidRow(
-      
-      selectInput("levvar", "Level variable", x_axis_vars, width ="50%"),
-      selectInput("xvar", "X-axis variable", x_axis_vars, width = "50%"),
-      selectInput("yvar", "Y-axis variable", y_axis_vars, width = "50%"),
+      selectInput("xvar", "X-axis variable", x_axis_vars, width = "50%",  selected = "bed_slope_angle"),
+      selectInput("levvar", "Level variable", x_axis_vars, width ="50%",  selected = "wind_mean"),
+      selectInput("yvar", "Y-axis variable", y_axis_vars, width = "50%",  selected = "ros"),
       
       column(width = 6, offset = 0,
              sliderInput("bed_slope_angle", "Bed Slope Angle (in Degrees):", min = 0, max = 30, value = 15),
@@ -27,7 +33,6 @@ renderInputs <- function(prefix) {
              sliderInput("ignition_depth", "Ignition Depth (meters)", min = 0.1, max = 4.0, value = 1.0, step = 0.01),
              sliderInput("particle_diameter", "Particle Diameter (meters):", min = 0.001, max = .005, value = .0035, step = 0.0005),
              sliderInput("particle_moisture", "Particle Moisture (%)", min = 2, max = 35, value = 2, step = 0.5),
-             
              sliderInput("wind_mean", "Mean Wind Speed (m/s)", min = 1, max = 10, value = 3.0, step = 0.1),
              
       )
