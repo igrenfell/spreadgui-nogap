@@ -103,7 +103,7 @@ predict_spread <- function(bed_slope_angle = 0, bed_width = 50,
                  min_fuel_depth, 
                  min_fuel_loading, 
                  min_ignition_depth, 
-                 min_particle_moisture, 
+                 min_particle_diameter, 
                  min_particle_moisture, 
                  min_wind_speed
   )
@@ -114,7 +114,7 @@ predict_spread <- function(bed_slope_angle = 0, bed_width = 50,
                  max_fuel_depth, 
                  max_fuel_loading, 
                  max_ignition_depth, 
-                 max_particle_moisture, 
+                 max_particle_diameter, 
                  max_particle_moisture, 
                  max_wind_speed
   )
