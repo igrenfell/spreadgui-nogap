@@ -17,7 +17,7 @@ use_virtualenv("/home/natalie/.virtualenvs/r-tensorflow")
 
 
 
-new_model <- load_model_tf('modelProtocolBufers/no_gap')
+new_model <- load_model_tf('modelProtocolBuffers/no_gap')
 
 nmc <- compile(new_model)
 ycolnames <- c( "ros", "fzd", "flength")
