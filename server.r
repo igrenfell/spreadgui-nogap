@@ -1,7 +1,5 @@
-library(here)
 library(tensorflow)
 library(keras)
-library(reticulate)
 
 #setwd(here())
 # paramNames <- c("start_capital", "annual_mean_return", "annual_ret_std_dev",
@@ -9,17 +7,17 @@ library(reticulate)
 #                 "n_sim")
 
 #use_virtualenv("G:\\tensorflow\\venv")
-use_virtualenv("I:\\spreadvenv\\spreadvenv")
-setwd("I:\\workspace\\spread-model\\modelProtocolBuffers")
+#use_virtualenv("I:\\spreadvenv\\spreadvenv")
+#setwd("I:\\workspace\\spread-model\\modelProtocolBuffers")
 
 #setwd("G:\\tensorflow\\modelProtocolBuffers")
 
 #needed to set virtual environment on server for shiny user
-#use_virtualenv("/home/natalie/.virtualenvs/r-tensorflow")
+use_virtualenv("/home/natalie/.virtualenvs/r-tensorflow")
 
 
 
-new_model <- load_model_tf('no_gap')
+new_model <- load_model_tf('modelProtocolBufers/no_gap')
 
 nmc <- compile(new_model)
 ycolnames <- c( "ros", "fzd", "flength")
