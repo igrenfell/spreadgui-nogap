@@ -266,21 +266,19 @@ function(input, output, session) {
                                    wind_mean=input$wind_mean, 
                                    xvar=  input$xvar, 
                                    yvar= input$yvar,
-                                   levvar = input$levvar
-  )
-    
-    
+                                   levvar = input$levvar)
   })
+
   output$a_distPlot <- renderPlot({
-    
     plot_nav(navA())  }
   )
+
   observeEvent(
     input$xvar,
     {
       updateSelectInput(
         inputId = "xvar",
-        choices = setdiff(paramNames[1:8], isolate(input$levvar)),
+        choices = paramNames[1:8],
         selected = isolate(input$xvar)
       )
     }
@@ -290,13 +288,10 @@ function(input, output, session) {
     {
       updateSelectInput(
         inputId = "levvar",
-        choices = setdiff(paramNames[1:8], isolate(input$xvar)),
+        choices = paramNames[1:8],
         selected = isolate(input$levvar)
       )
     }
   )
-  
-  
-  
 }
 
